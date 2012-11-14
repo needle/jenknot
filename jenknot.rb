@@ -26,7 +26,7 @@ command :haystack do |c|
     
     current_revision = dreadnot.deployed_revision('haystack',options.region)
     
-    if options.revision != current_revision or options.revision[0,7] != current_revision or $force == true
+    if options.revision != current_revision or $force == true
       unless dreadnot.deploy_revision('haystack',options.region,options.revision)
         raise "Fatal: deployment of haystack revision #{options.revision} in region #{options.region} failed"
       end
@@ -50,7 +50,7 @@ command :core do |c|
     
     current_revision = dreadnot.deployed_revision("#{options.partner}_core",options.partner)
 
-    if options.revision != current_revision or options.revision[0,7] != current_revision or $force == true
+    if options.revision[0,7] != current_revision or $force == true
       unless dreadnot.deploy_revision("#{options.partner}_core",options.partner,options.revision)
         raise "Fatal: deployment of core revision #{options.revision} for partner #{options.partner} failed."
       end
@@ -74,7 +74,7 @@ command :assets do |c|
    
     current_revision = dreadnot.deployed_revision("#{options.partner}_assets",options.region)
 
-    if options.revision != current_revision or options.revision[0,7] != current_revision or $force == true
+    if options.revision != current_revision or $force == true
       unless dreadnot.deploy_revision("#{options.partner}_assets",options.partner,options.revision)
         raise "Fatal: deployment of revision #{options.revision} for #{options.partner} partner assets failed."
       end
