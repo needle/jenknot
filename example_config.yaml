@@ -1,0 +1,4 @@
+config:
+  username: user
+  password: pass
+  api: https://dreadnot.example.com/api/1.0/
