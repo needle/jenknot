@@ -21,6 +21,14 @@ command :haystack do |c|
   c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to \'all\')'
   c.action do |args, options|
     options.default :region => 'all'
+
+    unless @config['username'] and @config['api']
+      raise 'Error: you must provide a valid username and API end point via config file'
+    end
+
+    if @config['password'].nil? or @config['password'].empty?
+      @config['password'] = ask("Password:  ") { |q| q.echo = "*" }
+    end
     
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
     
@@ -46,6 +54,14 @@ command :core do |c|
   c.action do |args, options|
     options.default :region => options.partner
 
+    unless @config['username'] and @config['api']
+      raise 'Error: you must provide a valid username and API end point via config file'
+    end
+
+    if @config['password'].nil? or @config['password'].empty?
+      @config['password'] = ask("Password:  ") { |q| q.echo = "*" }
+    end
+
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
     
     current_revision = dreadnot.deployed_revision("#{options.partner}_core",options.partner)
@@ -69,6 +85,14 @@ command :assets do |c|
   c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to partner name)'
   c.action do |args, options|
     options.default :region => options.partner
+
+    unless @config['username'] and @config['api']
+      raise 'Error: you must provide a valid username and API end point via config file'
+    end
+
+    if @config['password'].nil? or @config['password'].empty?
+      @config['password'] = ask("Password:  ") { |q| q.echo = "*" }
+    end
    
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
    
