@@ -42,6 +42,27 @@ end
 global_option('-f','--force','Force deployment even if the current revision matches the desired revision') {$force = true}
 global_option('-n','--noop','Perform a dry run, describing which actions would have been taken if the command were run for real') {$noop = true}
 
+command :show do |c|
+  c.description = 'shows the latest revision known to dreadnot for specified component'
+  c.option '--partner PARTNER', String, 'partner name (only useful for showing asset revisions)'
+  c.action do |args, options|
+    dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
+
+    case args.first
+    when "haystack"
+      latest = dreadnot.latest_revision('haystack')
+      puts "Latest known revision for haystack is #{latest}"
+    when "core"
+      latest = dreadnot.latest_revision('core')
+      puts "Latest known revision for core is #{latest}"
+    when "assets"
+      latest =  dreadnot.latest_revision("#{options.partner}_assets")
+      puts "Latest known asset revision for partner #{options.partner} is #{latest}"
+    end
+
+  end
+end
+
 command :haystack do |c|
   c.description = 'deploy specified revision of haystack'
   c.syntax = 'haystack --revision GIT_REVISION [--region DREADNOT_REGION]'
