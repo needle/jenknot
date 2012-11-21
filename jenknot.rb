@@ -40,6 +40,7 @@ global_option('-c FILE','--config FILE',String,'Specify path to config file with
 }
 
 global_option('-f','--force','Force deployment even if the current revision matches the desired revision') {$force = true}
+global_option('-n','--noop','Perform a dry run, describing which actions would have been taken if the command were run for real') {$noop = true}
 
 command :haystack do |c|
   c.description = 'deploy specified revision of haystack'
@@ -54,11 +55,14 @@ command :haystack do |c|
     current_revision = dreadnot.deployed_revision('haystack',options.region)
 
     if options.revision != current_revision or $force == true
-      unless dreadnot.deploy_revision('haystack',options.region,options.revision)
-        raise "Fatal: deployment of haystack revision #{options.revision} in region #{options.region} failed"
+      puts "Info: would have deployed haystack revision #{options.revision} in region #{options.region}, but we are in noop mode" if $noop
+      unless $noop
+        unless dreadnot.deploy_revision('haystack',options.region,options.revision)
+          raise "Fatal: deployment of haystack revision #{options.revision} in region #{options.region} failed"
+        end
       end
     else
-      puts "haystack revision #{options.revision} is already deployed, skipping"
+      puts "Error: haystack revision #{options.revision} is already deployed, skipping"
     end
 
   end
@@ -78,11 +82,14 @@ command :core do |c|
     current_revision = dreadnot.deployed_revision("#{options.partner}_core",options.partner)
 
     if options.revision[0,7] != current_revision or $force == true
-      unless dreadnot.deploy_revision("#{options.partner}_core",options.partner,options.revision)
-        raise "Fatal: deployment of core revision #{options.revision} for partner #{options.partner} failed."
+      puts "Info: would have deployed core revision #{options.revision} for partner #{options.partner}, but we are in noop mode" if $noop
+      unless $noop
+        unless dreadnot.deploy_revision("#{options.partner}_core",options.partner,options.revision)
+          raise "Fatal: deployment of core revision #{options.revision} for partner #{options.partner} failed."
+        end
       end
     else
-      puts "core revision #{options.revision} is already deployed for partner #{options.partner}, skipping"
+      puts "Error: core revision #{options.revision} is already deployed for partner #{options.partner}, skipping"
    end
 
   end
@@ -102,11 +109,14 @@ command :assets do |c|
     current_revision = dreadnot.deployed_revision("#{options.partner}_assets",options.region)
 
     if options.revision != current_revision or $force == true
-      unless dreadnot.deploy_revision("#{options.partner}_assets",options.partner,options.revision)
-        raise "Fatal: deployment of revision #{options.revision} for #{options.partner} partner assets failed."
+      puts "Info: would have deployed assets revision #{options.revision} for partner #{options.partner}, but we are in noop mode" if $noop
+      unless $noop
+        unless dreadnot.deploy_revision("#{options.partner}_assets",options.partner,options.revision)
+          raise "Fatal: deployment of assets revision #{options.revision} for #{options.partner} partner assets failed."
+        end
       end
     else
-      puts "revision #{options.revision} of #{options.partner}'s assets already deployed, skipping"
+      puts "Error: revision #{options.revision} of #{options.partner}'s assets already deployed, skipping"
    end
   
   end
