@@ -136,19 +136,27 @@ class Dreadnot
     options.merge!({:basic_auth => @auth, :base_uri => base_uri})
     options.merge!({:body => {'to_revision' => revision}})
     uri = "/stacks/#{stack}/regions/#{region}/deployments"
-    response = self.class.post(uri,options)
+
+    begin
+      response = self.class.post(uri,options)
+    rescue => e
+      puts "Error deploying #{stack} revision #{revision} to region #{region}: " + e.inspect
+      raise
+    end
+
 
     case response['name']
     when "DreadnotError","NotFoundError","StackLockedError"
       raise "Error deploying #{stack} in region #{region} @ #{revision}: " + response['name']
     else
       deploy_id = response['name']
-      print "Deploying #{stack} in region #{region} @ #{revision} as deploy #{deploy_id}."
+      print "Deploying #{stack} in region #{region} @ #{revision} as deploy #{deploy_id}: "
 
-      until deploy_running?(stack,region,deploy_id) == false
-        sleep 2
-        print "."
-      end
+      show_wait_spinner{
+        until deploy_running?(stack,region,deploy_id) == false
+          sleep 2
+        end
+      }
 
       if deploy_successful?(stack,region,deploy_id)
         puts "success!"
@@ -182,6 +190,27 @@ class Dreadnot
     else
       raise "Error getting success status of deploy #{deploy_id}: #{response.inspect}"
     end
+  end
+
+  private
+
+  # courtesy http://stackoverflow.com/a/10263337/1118434
+  def show_wait_spinner(fps=10)
+    chars = %w[| / - \\]
+    delay = 1.0/fps
+    iter = 0
+    spinner = Thread.new do
+      while iter do  # Keep spinning until told otherwise
+        print chars[(iter+=1) % chars.length]
+        sleep delay
+        print "\b"
+      end
+    end
+  ensure
+    yield.tap{       # After yielding to the block, save the return value
+      iter = false   # Tell the thread to exit, cleaning up after itself…
+      spinner.join   # …and wait for it to do so.
+    }                # Use the block's return value as the method's
   end
 
 end
