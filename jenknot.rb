@@ -13,7 +13,7 @@ program :description, 'an interface to dreadnot deployment API, primarily for us
 
 global_option('-e ENVIRONMENT','--environment ENVIRONMENT',String,'Specify the name of the target environment (defined in config file)') {|e| $env = e }
 
-global_option('-c FILE','--config FILE',String,'Specify path to config file with credentials') {|file| 
+global_option('-c FILE','--config FILE',String,'Specify path to config file with credentials') do |file|
   raw_config = YAML.load_file(file)
   if $env.nil? or $env.empty?
     case raw_config.keys.count
@@ -37,7 +37,7 @@ global_option('-c FILE','--config FILE',String,'Specify path to config file with
   while @config['password'].nil? or @config['password'].empty?
     @config['password'] = ask("Password:  ") { |q| q.echo = "*" }
   end
-}
+end
 
 global_option('-f','--force','Force deployment even if the current revision matches the desired revision') {$force = true}
 global_option('-n','--noop','Perform a dry run, describing which actions would have been taken if the command were run for real') {$noop = true}
@@ -180,7 +180,6 @@ class Dreadnot
       puts "Error deploying #{stack} revision #{revision} to region #{region}: " + e.inspect
       raise
     end
-
 
     case response['name']
     when "DreadnotError","NotFoundError","StackLockedError"
