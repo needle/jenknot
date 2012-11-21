@@ -29,6 +29,14 @@ global_option('-c FILE','--config FILE',String,'Specify path to config file with
       raise "Error: could not find environment #{$env} in config file"
     end
   end
+
+  unless @config['username'] and @config['api']
+    raise 'Error: you must provide a valid username and API end point via config file'
+  end
+
+  while @config['password'].nil? or @config['password'].empty?
+    @config['password'] = ask("Password:  ") { |q| q.echo = "*" }
+  end
 }
 
 global_option('-f','--force','Force deployment even if the current revision matches the desired revision') {$force = true}
@@ -41,18 +49,10 @@ command :haystack do |c|
   c.action do |args, options|
     options.default :region => 'all'
 
-    unless @config['username'] and @config['api']
-      raise 'Error: you must provide a valid username and API end point via config file'
-    end
-
-    if @config['password'].nil? or @config['password'].empty?
-      @config['password'] = ask("Password:  ") { |q| q.echo = "*" }
-    end
-    
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
     
     current_revision = dreadnot.deployed_revision('haystack',options.region)
-    
+
     if options.revision != current_revision or $force == true
       unless dreadnot.deploy_revision('haystack',options.region,options.revision)
         raise "Fatal: deployment of haystack revision #{options.revision} in region #{options.region} failed"
@@ -72,14 +72,6 @@ command :core do |c|
   c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to partner name)'
   c.action do |args, options|
     options.default :region => options.partner
-
-    unless @config['username'] and @config['api']
-      raise 'Error: you must provide a valid username and API end point via config file'
-    end
-
-    if @config['password'].nil? or @config['password'].empty?
-      @config['password'] = ask("Password:  ") { |q| q.echo = "*" }
-    end
 
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
     
@@ -104,14 +96,6 @@ command :assets do |c|
   c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to partner name)'
   c.action do |args, options|
     options.default :region => options.partner
-
-    unless @config['username'] and @config['api']
-      raise 'Error: you must provide a valid username and API end point via config file'
-    end
-
-    if @config['password'].nil? or @config['password'].empty?
-      @config['password'] = ask("Password:  ") { |q| q.echo = "*" }
-    end
    
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
    
