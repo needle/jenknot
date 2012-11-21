@@ -1,4 +1,13 @@
-config:
+qa:
   username: user
   password: pass
+  api: https://dreadnot.qa.example.com/api/1.0/
+
+staging:
+  username: user
+  password: pass
+  api: https://dreadnot.stg.example.com/api/1.0/
+
+production:
+  username: user
   api: https://dreadnot.example.com/api/1.0/
