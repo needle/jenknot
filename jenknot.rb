@@ -45,19 +45,29 @@ global_option('-n','--noop','Perform a dry run, describing which actions would h
 command :show do |c|
   c.description = 'shows the latest revision known to dreadnot for specified component'
   c.option '--partner PARTNER', String, 'partner name (only useful for showing asset revisions)'
+  c.option '--region REGION', String, 'dreadnot region to query'
   c.action do |args, options|
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
 
     case args.first
     when "haystack"
+      options.default :region => 'all'
       latest = dreadnot.latest_revision('haystack')
+      deployed = dreadnot.deployed_revision('haystack',options.region)
       puts "Latest known revision for haystack is #{latest}"
+      puts "Latest deployed revision for haystack is #{deployed}"
     when "core"
-      latest = dreadnot.latest_revision('core')
-      puts "Latest known revision for core is #{latest}"
+      options.default :region => options.partner
+      latest = dreadnot.latest_revision("#{options.partner}_core")
+      deployed = dreadnot.deployed_revision("#{options.partner}_core",options.partner)
+      puts "Latest known core revision for partner #{options.partner} is #{latest}"
+      puts "Latest deployed core revision for partner #{options.partner} is #{deployed}"
     when "assets"
+      options.default :region => options.partner
       latest =  dreadnot.latest_revision("#{options.partner}_assets")
+      deployed = dreadnot.deployed_revision("#{options.partner}_assets",options.partner)
       puts "Latest known asset revision for partner #{options.partner} is #{latest}"
+      puts "Latest deployed asset revision for partner #{options.partner} is #{deployed}"
     end
 
   end
