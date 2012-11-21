@@ -48,10 +48,11 @@ command :haystack do |c|
   c.option '--revision REVISION_ID', String, 'git revision id to be deployed for haystack'
   c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to \'all\')'
   c.action do |args, options|
-    options.default :region => 'all'
-
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
     
+    options.default :region => 'all'
+    options.default :revision => dreadnot.latest_revision('haystack')
+
     current_revision = dreadnot.deployed_revision('haystack',options.region)
 
     if options.revision != current_revision or $force == true
@@ -75,9 +76,10 @@ command :core do |c|
   c.option '-p', '--partner PARTNER', String, 'partner to deploy to'
   c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to partner name)'
   c.action do |args, options|
-    options.default :region => options.partner
-
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
+
+    options.default :region => options.partner
+    options.default :revision => dreadnot.latest_revision("#{options.partner}_core")
     
     current_revision = dreadnot.deployed_revision("#{options.partner}_core",options.partner)
 
@@ -102,10 +104,11 @@ command :assets do |c|
   c.option '--partner PARTNER', String, 'partner assets to deploy'
   c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to partner name)'
   c.action do |args, options|
-    options.default :region => options.partner
-   
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
-   
+
+    options.default :region => options.partner
+    options.default :revision => dreadnot.latest_revision("#{options.partner}_assets")
+
     current_revision = dreadnot.deployed_revision("#{options.partner}_assets",options.region)
 
     if options.revision != current_revision or $force == true
