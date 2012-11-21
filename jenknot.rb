@@ -11,7 +11,26 @@ program :description, 'an interface to dreadnot deployment API, primarily for us
 
 @config = Hash.new
 
-global_option('-c FILE','--config FILE',String,'Specify path to config file with credentials') {|file| @config.merge!(YAML.load_file(file)['config'])}
+global_option('-e ENVIRONMENT','--environment ENVIRONMENT',String,'Specify the name of the target environment (defined in config file)') {|e| $env = e }
+
+global_option('-c FILE','--config FILE',String,'Specify path to config file with credentials') {|file| 
+  raw_config = YAML.load_file(file)
+  if $env.nil? or $env.empty?
+    case raw_config.keys.count
+    when 1
+      @config.merge!(raw_config.first[1])
+    else
+      raise 'Error: your config file contains multiple environments but you have not specified which one to use'
+    end
+  else
+    if raw_config.has_key?($env)
+      @config.merge!(raw_config[$env])
+    else
+      raise "Error: could not find environment #{$env} in config file"
+    end
+  end
+}
+
 global_option('-f','--force','Force deployment even if the current revision matches the desired revision') {$force = true}
 
 command :haystack do |c|
