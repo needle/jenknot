@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
 require 'yaml'
 require 'httparty'
 require 'commander/import'
