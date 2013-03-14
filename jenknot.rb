@@ -49,12 +49,13 @@ command :show do |c|
     dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
 
     case args.first
-    when "haystack"
+    when "haystack","needler-registration"
+      app_name = args.first
       options.default :region => 'all'
-      latest = dreadnot.latest_revision('haystack')
-      deployed = dreadnot.deployed_revision('haystack',options.region)
-      puts "Latest known revision for haystack is #{latest}"
-      puts "Latest deployed revision for haystack is #{deployed}"
+      latest = dreadnot.latest_revision(app_name)
+      deployed = dreadnot.deployed_revision(app_name,options.region)
+      puts "Latest known revision for #{app_name} is #{latest}"
+      puts "Latest deployed revision for #{app_name} is #{deployed}"
     when "core"
       options.default :region => options.partner
       latest = dreadnot.latest_revision("#{options.partner}_core")
@@ -72,31 +73,35 @@ command :show do |c|
   end
 end
 
-command :haystack do |c|
-  c.description = 'deploy specified revision of haystack'
-  c.syntax = 'haystack --revision GIT_REVISION [--region DREADNOT_REGION]'
-  c.option '--revision REVISION_ID', String, 'git revision id to be deployed for haystack'
-  c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to \'all\')'
-  c.action do |args, options|
-    dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
-    
-    options.default :region => 'all'
-    options.default :revision => dreadnot.latest_revision('haystack')
+[:haystack,:'needler-registration'].each do |app|
+  command app do |c|
+    app_name = app.to_s
+    c.description = "deploy specified revision of #{app_name}"
+    c.syntax = "#{app_name} --revision GIT_REVISION [--region DREADNOT_REGION]"
+    c.option "--revision REVISION_ID', String, 'git revision id to be deployed for #{app_name}"
+    c.option '--region REGION', String, 'dreadnot region to deploy to (defaults to \'all\')'
+    c.action do |args, options|
+      dreadnot = Dreadnot.new(@config['username'],@config['password'],@config['api'])
 
-    current_revision = dreadnot.deployed_revision('haystack',options.region)
+      options.default :region => 'all'
+      options.default :revision => dreadnot.latest_revision(app_name)
 
-    if options.revision != current_revision or $force == true
-      puts "Info: would have deployed haystack revision #{options.revision} in region #{options.region}, but we are in noop mode" if $noop
-      unless $noop
-        unless dreadnot.deploy_revision('haystack',options.region,options.revision)
-          raise "Fatal: deployment of haystack revision #{options.revision} in region #{options.region} failed"
+      current_revision = dreadnot.deployed_revision(app_name,options.region)
+
+      if options.revision != current_revision or $force == true
+        puts "Info: would have deployed #{app_name} revision #{options.revision} in region #{options.region}, but we are in noop mode" if $noop
+        unless $noop
+          unless dreadnot.deploy_revision(app_name,options.region,options.revision)
+            raise "Fatal: deployment of #{app_name} revision #{options.revision} in region #{options.region} failed"
+          end
         end
+      else
+        puts "Error: #{app_name} revision #{options.revision} is already deployed, skipping"
       end
-    else
-      puts "Error: haystack revision #{options.revision} is already deployed, skipping"
-    end
 
+    end
   end
+
 end
 
 command :core do |c|
@@ -110,7 +115,7 @@ command :core do |c|
 
     options.default :region => options.partner
     options.default :revision => dreadnot.latest_revision("#{options.partner}_core")
-    
+
     current_revision = dreadnot.deployed_revision("#{options.partner}_core",options.partner)
 
     if options.revision[0,7] != current_revision or $force == true
@@ -151,7 +156,7 @@ command :assets do |c|
     else
       puts "Error: revision #{options.revision} of #{options.partner}'s assets already deployed, skipping"
    end
-  
+
   end
 end
 
