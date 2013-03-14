@@ -5,7 +5,7 @@ require 'httparty'
 require 'commander/import'
 
 program :name, 'jenknot'
-program :version, '0.1.3'
+program :version, '0.1.4'
 program :description, 'an interface to dreadnot deployment API, primarily for use with jenkins'
 
 @config = Hash.new
